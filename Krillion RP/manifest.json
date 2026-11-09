@@ -1,0 +1,29 @@
+{
+    "format_version": 2,
+    "header": {
+        "name": "Krillion RP",
+        "description": "-By TrayePlays",
+        "min_engine_version": [
+            1,
+            21,
+            0
+        ],
+        "uuid": "5012f0bb-3ffc-4f9b-aed2-d7357096cbdb",
+        "version": [
+            1,
+            0,
+            0
+        ]
+    },
+    "modules": [
+        {
+            "type": "resources",
+            "uuid": "d564c149-7f7b-4797-bf52-c9e2b5f8e048",
+            "version": [
+                1,
+                0,
+                0
+            ]
+        }
+    ]
+}

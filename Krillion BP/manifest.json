@@ -1,0 +1,50 @@
+{
+    "format_version": 2,
+    "header": {
+        "name": "Krillion BP",
+        "description": "-By TrayePlays",
+        "min_engine_version": [
+            1,
+            21,
+            0
+        ],
+        "uuid": "76bc711b-266d-40a5-8236-09a84b579866",
+        "version": [
+            1,
+            0,
+            0
+        ]
+    },
+    "modules": [
+        {
+            "type": "data",
+            "uuid": "842f380b-b39a-4679-a925-891657448950",
+            "version": [
+                1,
+                0,
+                0
+            ]
+        },
+        {
+            "type": "script",
+            "language": "javascript",
+            "uuid": "65fd8403-9f15-46ea-bad5-777dc529673e",
+            "entry": "scripts/main.js",
+            "version": [
+                1,
+                0,
+                0
+            ]
+        }
+    ],
+    "dependencies": [
+        {
+            "module_name": "@minecraft/server",
+            "version": "2.11.0"
+        },
+        {
+            "module_name": "@minecraft/server-ui",
+            "version": "2.3.0"
+        }
+    ]
+}

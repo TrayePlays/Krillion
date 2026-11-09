@@ -1,0 +1,478 @@
+#krillion-ui {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background:
+        radial-gradient(ellipse at 50% 40%, rgba(15, 65, 85, .35), transparent 65%),
+        linear-gradient(180deg, #061b2a 0%, #062536 45%, #03121f 100%);
+    color: white;
+    font-family: sans-serif;
+}
+
+#krillion-ui * {
+    box-sizing: border-box;
+}
+
+#krillion-ui .background {
+    z-index: -2;
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: .08;
+    transition: transform 1.2s cubic-bezier(.22, .61, .36, 1);
+    pointer-events: none;
+}
+
+#krillion-ui .overlay {
+    z-index: -1;
+    position: absolute;
+    inset: 0;
+    visibility: hidden;
+    background:
+        linear-gradient(180deg, rgba(0, 10, 25, .1), transparent 40%, rgba(0, 5, 15, .55)),
+        radial-gradient(ellipse at center, transparent 25%, rgba(0, 5, 15, .4) 100%);
+    pointer-events: none;
+}
+
+#krillion-ui .ocean {
+    z-index: 3;
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    pointer-events: none;
+    background:
+        radial-gradient(circle, rgba(110, 220, 255, .5) 1px, transparent 1.5px) 0 0 / 83px 97px,
+        radial-gradient(circle, rgba(110, 220, 255, .25) 1px, transparent 1.5px) 35px 42px / 127px 113px,
+        radial-gradient(ellipse at 50% 50%, rgba(9, 63, 83, .2), transparent 75%);
+}
+
+#krillion-ui .krillion-wrap {
+    position: absolute;
+    z-index: 20;
+    left: 18%;
+    top: 24%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    pointer-events: none;
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%);
+    transition:
+        left 1s cubic-bezier(.22, .61, .36, 1),
+        top 1s cubic-bezier(.22, .61, .36, 1),
+        transform 1s cubic-bezier(.22, .61, .36, 1),
+        opacity .35s ease,
+        visibility .35s;
+}
+
+#krillion-ui .krillion-wrap.krillion-hidden {
+    opacity: 0;
+    visibility: hidden;
+}
+
+#krillion-ui .krillion {
+    display: block;
+    width: 96px;
+    height: 96px;
+    object-fit: contain;
+    filter: drop-shadow(0 0 12px rgba(255, 75, 160, .35));
+    image-rendering: pixelated;
+}
+
+#krillion-ui .krillion-answer {
+    min-width: 100px;
+    max-width: 220px;
+    padding: 8px 14px;
+    background: rgba(3, 14, 31, .95);
+    border: 1px solid #4de3ff;
+    color: #e8f1ff;
+    font-family: monospace;
+    font-size: 16px;
+    font-weight: bold;
+    text-align: center;
+    overflow-wrap: anywhere;
+    opacity: 0;
+    transition: opacity .3s ease;
+}
+
+#krillion-ui .krillion-wrap.checking,
+#krillion-ui .krillion-wrap.sinking {
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
+
+#krillion-ui .krillion-wrap.checking .krillion-answer,
+#krillion-ui .krillion-wrap.sinking .krillion-answer {
+    opacity: 1;
+}
+
+#krillion-ui .krillion-wrap.sinking {
+    transform: translate(-50%, calc(-50% + var(--sink-distance, 0px)));
+}
+
+#krillion-ui .logo {
+    position: fixed;
+    top: 12%;
+    left: 0;
+    right: 0;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    display: block;
+    line-height: .9;
+    font-family: monospace;
+    font-size: 90px;
+    font-weight: 900;
+    letter-spacing: .04em;
+    line-height: 1.2;
+    text-align: center;
+    color: #e8f1ff;
+    text-shadow: -4px 3px #ff5d8f, 4px -3px #4de3ffd9, 0 0 30px #4de3ff59;
+    animation: 3.2s ease-in-out infinite ds-bob-l;
+    display: inline-block
+}
+
+@keyframes ds-bob-l {
+
+    0%,
+    to {
+        transform: translateY(0)
+    }
+
+    50% {
+        transform: translateY(-9px)
+    }
+}
+
+#krillion-ui .subtitle {
+    position: fixed;
+    top: 36%;
+    left: 0;
+    right: 0;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    display: block;
+    font-family: monospace;
+    font-size: 20px;
+    font-weight: bold;
+    letter-spacing: 8px;
+    text-align: center;
+    color: #25b9d4;
+}
+
+#krillion-ui .tagline {
+    position: fixed;
+    top: 41%;
+    left: 0;
+    right: 0;
+    width: 100%;
+    margin: 0;
+    padding: 0 5%;
+    display: block;
+    font-family: monospace;
+    font-size: 13px;
+    text-shadow: 0 2px #050a1466, 0 0 12px #4de3ff80;
+    letter-spacing: 2px;
+    text-align: center;
+    color: #7895b0;
+}
+
+#krillion-ui .question {
+    position: fixed;
+    top: 35%;
+    left: 15%;
+    width: 70%;
+    min-height: 105px;
+    margin: 0;
+    padding: 25px 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(3, 14, 31, .88);
+    border: 1px solid rgba(85, 190, 220, .16);
+    border-left: 3px solid #ed4b9a;
+    color: #f1f6ff;
+    font-size: 25px;
+    font-weight: bold;
+    line-height: 1.4;
+    text-align: left;
+    text-shadow: 0 2px 8px #00121f;
+    box-shadow: 0 10px 35px rgba(0, 0, 0, .2);
+}
+
+#krillion-ui .answer-area {
+    justify-content: center;
+    position: fixed !important;
+    top: auto !important;
+    bottom: 8% !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100%;
+    height: auto;
+    margin: 0;
+    padding: 0 10%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+    z-index: 100;
+    transform: none !important;
+}
+
+#krillion-ui .answer-area input {
+    position: static;
+    width: 40%;
+    flex: 0 1 40%;
+    height: 65px;
+    padding: 15px;
+    font-size: 24px;
+    font-family: monospace;
+    text-align: center;
+    border-radius: 0;
+}
+
+#krillion-ui .answer-area button {
+    position: static !important;
+    top: auto !important;
+    bottom: auto !important;
+    left: auto !important;
+    right: auto !important;
+    transform: none !important;
+    color: #e8f1ff;
+    cursor: pointer;
+    transition: transform .15s var(--ds-ease-snap), box-shadow .2s var(--ds-ease-out);
+    animation: ds-btn-bob 1.9s var(--ds-ease-io) infinite;
+    display: flex;
+    flex: 0 0 20%;
+    width: 20%;
+    min-height: 75px;
+    margin: 0;
+    padding:13px 34px 11px;
+    align-items: center;
+    justify-content: center;
+    border:none;
+    border-radius: 0;
+    background:#101d33;
+    color: #e4f3ff;
+    font-family: monospace;
+    font-size: 28px;
+    font-weight: bold;
+    letter-spacing: 2px;
+    line-height: 1;
+    text-align: center;
+    box-shadow:0 0 0 3px #050a14,0 0 0 6px #4de3ff,0 6px 0 6px #123048,0 0 26px #4de3ff4d
+}
+
+@keyframes ds-btn-bob {
+  0%,
+  to {
+    transform:translateY(0)
+  }
+  50% {
+    transform:translateY(5px)
+  }
+}
+
+#krillion-ui .answer-area button:hover {
+  box-shadow:0 0 0 3px #050a14,0 0 0 6px #ff5d8f,0 6px 0 6px #123048,0 0 34px #ff5d8f8c
+}
+
+#krillion-ui input {
+    display: block;
+    flex: 1;
+    min-width: 0;
+    height: 55px;
+    padding: 12px 16px;
+    background: rgba(3, 17, 34, .95);
+    border: 2px solid #55cde9;
+    border-radius: 0;
+    outline: none;
+    color: white;
+    font-family: monospace;
+    font-size: 19px;
+    text-align: left;
+}
+
+#krillion-ui input::placeholder {
+    color: #8298aa;
+}
+
+#krillion-ui input:focus {
+    border-color: #ff4c9d;
+    box-shadow: 0 0 12px rgba(255, 76, 157, .2);
+}
+
+#krillion-ui button {
+    display: block;
+    width: 100%;
+    height: 75px;
+    min-height: 75px;
+    margin: 0;
+    padding: 0 12px;
+    border: 3px solid #36eaff;
+    border-radius: 0;
+    background: #101f39;
+    color: #e4f3ff;
+    font-family: monospace;
+    font-size: 22px;
+    font-weight: bold;
+    letter-spacing: 2px;
+    text-align: center;
+    box-shadow: 0 5px 0 rgba(0, 0, 0, .35), 0 0 15px rgba(54, 234, 255, .2);
+}
+
+#krillion-ui button:active {
+    filter: brightness(.8);
+}
+
+#krillion-ui button:disabled {
+    opacity: .5;
+}
+
+#krillion-ui .description {
+    position: absolute;
+    left: 50%;
+    bottom: -30px;
+    transform: translateX(-50%);
+    width: max-content;
+    max-width: 100%;
+    margin: 0;
+    color: #ff9eae;
+    font-family: monospace;
+    font-size: 20px;
+    text-align: center;
+    text-shadow: 0 2px 6px black;
+    white-space: nowrap;
+}
+
+/* Timer */
+
+#krillion-ui .timer-area {
+    position: fixed;
+    left: 10%;
+    bottom: 25px;
+    z-index: 3;
+    width: 80%;
+    text-align: center;
+}
+
+#krillion-ui .timer {
+    margin-bottom: 8px;
+    color: #d9f5ff;
+    font-family: monospace;
+    font-size: 18px;
+    font-weight: bold;
+    text-shadow: 0 2px 5px black;
+}
+
+#krillion-ui .timer-track {
+    height: 5px;
+    border-radius: 0;
+    background: rgba(0, 0, 0, .6);
+    overflow: hidden;
+}
+
+#krillion-ui .timer-progress {
+    width: 100%;
+    height: 100%;
+    background: #49d5ff;
+    box-shadow: 0 0 8px rgba(73, 213, 255, .5);
+    transition: width .2s linear;
+}
+
+#krillion-ui .results {
+    position: fixed;
+    left: 15%;
+    top: 20%;
+    z-index: 10;
+    width: 70%;
+    height: 65%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 25px;
+    background: rgba(3, 14, 31, .94);
+    border: 1px solid rgba(85, 190, 220, .3);
+    border-top: 3px solid #ed4b9a;
+    color: #e8f5ff;
+    text-align: center;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, .4);
+}
+
+#krillion-ui .results-rank {
+    color: #7895b0;
+    font-family: monospace;
+    font-size: 18px;
+    font-weight: bold;
+    letter-spacing: 5px;
+}
+
+#krillion-ui .rarity-image {
+    display: block;
+    width: 180px;
+    height: 180px;
+    object-fit: contain;
+    image-rendering: pixelated;
+    filter: drop-shadow(0 0 20px rgba(77, 227, 255, .35));
+}
+
+#krillion-ui .rarity-name {
+    color: #e8f1ff;
+    font-family: monospace;
+    font-size: 36px;
+    font-weight: 900;
+    letter-spacing: 5px;
+    text-shadow: 0 0 15px rgba(77, 227, 255, .3);
+}
+
+#krillion-ui .results-score {
+    color: #7895b0;
+    font-family: monospace;
+    font-size: 14px;
+    letter-spacing: 2px;
+}
+
+#krillion-ui .depth-card {
+    position: fixed;
+    top: 25px;
+    left: 25px;
+    z-index: 5;
+    min-width: 145px;
+    padding: 12px 16px;
+    background: rgba(3, 14, 31, .9);
+    border: 1px solid rgba(85, 190, 220, .3);
+    border-left: 3px solid #ed4b9a;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, .3);
+}
+
+#krillion-ui .depth-label {
+    color: #7895b0;
+    font-family: monospace;
+    font-size: 11px;
+    font-weight: bold;
+    letter-spacing: 2px;
+}
+
+#krillion-ui .depth-value {
+    margin-top: 4px;
+    color: #f5f5ff;
+    font-family: monospace;
+    font-size: 30px;
+    font-weight: bold;
+    text-shadow: 0 0 10px rgba(54, 234, 255, .4);
+}
+
+#krillion-ui .hidden {
+    display: none !important;
+}
