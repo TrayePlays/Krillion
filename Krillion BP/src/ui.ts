@@ -1,5 +1,5 @@
-import { Player, system, world } from "@minecraft/server"
-import { CustomForm, ObservableBoolean, ObservableString } from "@minecraft/server-ui"
+import { CommandPermissionLevel, CustomCommandSource, CustomCommandStatus, Player, system, world } from "@minecraft/server"
+import { CustomForm, ModalFormData, ObservableBoolean, ObservableString } from "@minecraft/server-ui"
 import { getQuestion, getTodayPrompts, Prompts, scorePictures, sleep, Tier, tryAnswer } from "utils";
 
 export function mainUI(player: Player) {
@@ -264,6 +264,40 @@ export function mainUI(player: Player) {
     initialForm();
     form.show();
 }
+
+system.beforeEvents.startup.subscribe(({ customCommandRegistry }) => {
+    customCommandRegistry.registerCommand({
+        name: "krillion:settings",
+        description: "Edits the settings of the game krillion",
+        permissionLevel: CommandPermissionLevel.Admin,
+        cheatsRequired: false
+    }, (origin) => {
+        if (origin?.sourceEntity?.typeId == "minecraft:player") {
+            const player = origin.sourceEntity as Player;
+            const form = new ModalFormData();
+            form.title("Settings");
+            form.toggle("Show welcome message", { defaultValue: world.getDynamicProperty("welcomeMessage") as boolean ?? true });
+            form.toggle("Show update message", { defaultValue: world.getDynamicProperty("updateMessage") as boolean ?? true });
+
+            system.run(async () => {
+                const { formValues, canceled } = await form.show(player)
+                if (canceled || !formValues) return;
+
+                world.setDynamicProperties({ welcomeMessage: formValues[0], updateMessage: formValues[1] });
+                player.sendMessage("§aUpdated Settings!");
+                player.playSound("note.bell");
+            })
+            return {
+                status: CustomCommandStatus.Success,
+            }
+        } else {
+            return {
+                status: CustomCommandStatus.Failure,
+                message: "§cRun this as a player!"
+            }
+        }
+    })
+})
 
 world.afterEvents.itemUse.subscribe(({ itemStack, source: player }) => {
     if (itemStack.typeId == "krillion:krillion") {
