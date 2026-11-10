@@ -4,7 +4,7 @@ import { HivemindAPI, ServerStatusResponse } from "api"
 import "./ui"
 
 export const api = new HivemindAPI("Krillion", {onConnect: initialConnect, logFailures: false});
-const KRILLION_VERSION = 0.1;
+const KRILLION_VERSION = 0.11;
 const INITIAL_MESSAGE = `§eThanks for installing §6Krillion v${KRILLION_VERSION}\n§pTo get started type §5/function connect\n§7Disable this msg in §d/krillion:settings`;
 
 async function initialConnect() {

@@ -17,7 +17,16 @@ export interface Prompts {
     prompts: Prompt[];
 }
 
-export type Tier = "plankton" | "schooler" | "rare" | "deepcut" | "krillion"
+export type Tier = "nocatch" | "plankton" | "schooler" | "rare" | "deepcut" | "krillion"
+
+export const formattedTiers = {
+    "nocatch": "No Catch",
+    "plankton": "Plankton",
+    "schooler": "Schooler",
+    "rare": "Rare",
+    "deepcut": "Deep Cut",
+    "krillion": "Krillion"
+}
 
 export const scorePictures = {
     "nocatch": "/textures/ui/realms_red_x.png",
@@ -28,11 +37,19 @@ export const scorePictures = {
     "krillion": "/textures/items/krillion.png"
 }
 
+export const scoreColors = {
+    "nocatch": "7",
+    "plankton": "9",
+    "schooler": "a",
+    "rare": "b",
+    "deepcut": "c",
+    "krillion": "6"
+}
+
 interface Prompt {
     id: string;
     text: string;
 }
-
 
 type Answer = CorrectAnswer | IncorrectAnswer
 
@@ -45,6 +62,7 @@ interface CorrectAnswer {
 
 interface IncorrectAnswer {
     accepted: false;
+    correction?: string;
     receipt: string;
 }
 
@@ -56,7 +74,7 @@ export async function getTodayPrompts(): Promise<Prompts | undefined> {
     return promptsReq.getData() as Prompts;
 }
 
-export async function tryAnswer(answer: string, promptId: string): Promise<Answer> {
+export async function tryAnswer(answer: string, promptId: string, autoCorrect = true): Promise<Answer> {
     const answerReq = await api.sendHttpRequest("https://krillion.io/api/submit", {
         credentials: "omit",
         headers: {
@@ -83,15 +101,49 @@ export async function tryAnswer(answer: string, promptId: string): Promise<Answe
             promptId
         })
     })
-
     if (answerReq.status != ServerStatusResponse.Success) return { accepted: false, receipt: "" }
-
-    return answerReq.getData() as Answer;
+    const a = answerReq.getData() as Answer;
+    if (a.accepted == false && a.correction != undefined && autoCorrect) return tryAnswer(a.correction, promptId);
+    return a;
 
 }
 
 export function getQuestion(prompts: Prompts, index: number) {
     return prompts.prompts.find(p => p.id == `p${index}`)?.text ?? "Unknown";
+}
+
+export interface Stat {
+    date: string;
+    attempt: number;
+    data: { prompts: string[], answers: string[], tiers: Tier[] };
+}
+
+export function getStats(player: Player) {
+    const stats: Stat[] = [];
+
+    for (const dp of player.getDynamicPropertyIds().filter(dp => dp.startsWith("stats|"))) {
+        const [label, date, attempt] = dp.split("|")
+        const raw = player.getDynamicProperty(dp) as string;
+        const stat = JSON.parse(raw) as { prompts: string[], answers: string[], tiers: Tier[] };
+
+        stats.push({
+            date,
+            attempt: Number(attempt),
+            data: stat
+        });
+    }
+
+    console.warn(`Got stats: ${JSON.stringify(stats)}`);
+
+    return stats;
+}
+
+export function saveStats(player: Player, stat: Stat) {
+    console.warn(`Set stats|${stat.date}|${stat.attempt} to ${JSON.stringify(stat.data)}`);
+    player.setDynamicProperty(
+        `stats|${stat.date}|${stat.attempt}`,
+        JSON.stringify(stat.data)
+    )
 }
 
 // the rest

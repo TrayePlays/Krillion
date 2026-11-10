@@ -1,6 +1,6 @@
-import { CommandPermissionLevel, CustomCommandSource, CustomCommandStatus, Player, system, world } from "@minecraft/server"
-import { CustomForm, ModalFormData, ObservableBoolean, ObservableString } from "@minecraft/server-ui"
-import { getQuestion, getTodayPrompts, Prompts, scorePictures, sleep, Tier, tryAnswer } from "utils";
+import { CommandPermissionLevel, CustomCommandParamType, CustomCommandSource, CustomCommandStatus, Player, system, world } from "@minecraft/server"
+import { ActionFormData, CustomForm, ModalFormData, ObservableBoolean, ObservableString } from "@minecraft/server-ui"
+import { formatDate, getQuestion, getStats, getTodayPrompts, Prompts, saveStats, scoreColors, scorePictures, sleep, Stat, Tier, tryAnswer } from "utils";
 
 export function mainUI(player: Player) {
     let localPrompts: Prompts;
@@ -54,7 +54,7 @@ export function mainUI(player: Player) {
 
         publishUI({
             page: "intro",
-            buttonText: "BEGIN DESCENT",
+            buttonText: "DESEND",
             buttonDisabled: false,
             inputDisabled: true,
             depth: 0,
@@ -93,6 +93,16 @@ export function mainUI(player: Player) {
             gained: score,
             depth: score,
         });
+
+        saveStats(player, {
+            attempt: 1,
+            date: formatDate(),
+            data: {
+                prompts: localPrompts.prompts.map(p => p.text),
+                answers: yourAnswers.map(a => a.answer),
+                tiers: yourAnswers.map(t => t.tier)
+            }
+        })
     }
 
     async function checkAnswer(question: string, prompts: Prompts, index: number, timer: number, last = false) {
@@ -111,7 +121,7 @@ export function mainUI(player: Player) {
             answer,
         });
         player.playSound("mob.witch.throw", { pitch: 2 });
-        const check = await tryAnswer(answer, `p${index ?? 1}`);
+        const check = await tryAnswer(answer, `p${index ?? 1}`, player.getDynamicProperty("autoCorrect") as boolean ?? true);
 
         paused = false;
         if (check.accepted) {
@@ -120,7 +130,7 @@ export function mainUI(player: Player) {
 
             score += check.score;
             yourAnswers.push({
-                answer,
+                answer: check.answer,
                 question,
                 score: check.score,
                 tier: check.tier
@@ -154,6 +164,13 @@ export function mainUI(player: Player) {
                     button1.disabled.setData(false);
                     gameForm(prompts, (index ?? 1) + 1);
                 };
+
+                yourAnswers.push({
+                    answer,
+                    question,
+                    score: 0,
+                    tier: "nocatch"
+                });
 
                 publishUI({
                     page: "results",
@@ -278,12 +295,15 @@ system.beforeEvents.startup.subscribe(({ customCommandRegistry }) => {
             form.title("Settings");
             form.toggle("Show welcome message", { defaultValue: world.getDynamicProperty("welcomeMessage") as boolean ?? true });
             form.toggle("Show update message", { defaultValue: world.getDynamicProperty("updateMessage") as boolean ?? true });
+            form.toggle("Autocorrect?", { defaultValue: player.getDynamicProperty("autoCorrect") as boolean ?? true })
 
             system.run(async () => {
                 const { formValues, canceled } = await form.show(player)
                 if (canceled || !formValues) return;
 
                 world.setDynamicProperties({ welcomeMessage: formValues[0], updateMessage: formValues[1] });
+                player.setDynamicProperties({ autoCorrect: formValues[2] });
+
                 player.sendMessage("§aUpdated Settings!");
                 player.playSound("note.bell");
             })
@@ -293,10 +313,89 @@ system.beforeEvents.startup.subscribe(({ customCommandRegistry }) => {
         } else {
             return {
                 status: CustomCommandStatus.Failure,
-                message: "§cRun this as a player!"
+                message: "Run this as a player!"
+            };
+        }
+    })
+    customCommandRegistry.registerCommand({
+        name: "krillion:stats",
+        description: "Checks krillion stats of you or another player",
+        permissionLevel: CommandPermissionLevel.Any,
+        cheatsRequired: false,
+        optionalParameters: [
+            {
+                name: "player",
+                type: CustomCommandParamType.PlayerSelector
+            }
+        ],
+    }, (origin, selector) => {
+        if (Array.isArray(selector) && selector.length != 1) {
+            return {
+                status: CustomCommandStatus.Failure,
+                message: "Run this on only 1 player!"
+            };
+        }
+        if (origin?.sourceEntity?.typeId == "minecraft:player") {
+            const player = origin.sourceEntity as Player;
+            let target = player;
+            if (selector) target = selector[0];
+            const stats = getStats(target);
+
+            if (stats.length == 0) {
+                return {
+                    status: CustomCommandStatus.Failure,
+                    message: "Player has no recorded stats"
+                };
+            }
+
+            async function statsForm() {
+                const form = new ActionFormData();
+                form.title("Stats");
+
+                for (let i = 0; i < stats.length; i++) {
+                    const stat = stats[i];
+                    form.button(`${stat.date}\nAttempt: ${stat.attempt}`);
+                }
+                const { selection, canceled } = await form.show(player)
+                if (canceled || selection == undefined) return;
+                const stat = stats[selection]
+                statForm(stat);
+            }
+
+            async function statForm(stat: Stat) {
+                const form = new ActionFormData();
+                form.title(stat.date);
+
+                for (let i = 0; i < stat.data.prompts.length; i++) {
+                    const answer = stat.data.answers[i];
+                    const prompt = stat.data.prompts[i];
+                    const tier = stat.data.tiers[i];
+
+                    form.label(`${prompt}\n\nYour Answer: §${scoreColors[tier]}${answer.length == 0 ? "No Answer" : answer} (${tier})`);
+                    if (i != stat.data.prompts.length - 1) form.divider();
+                }
+
+                form.button("Back");
+                const { selection, canceled } = await form.show(player);
+                if (selection == 0) statsForm();
+            }
+
+            system.run(() => statsForm());
+
+            return {
+                status: CustomCommandStatus.Success
             }
         }
     })
+})
+
+system.afterEvents.scriptEventReceive.subscribe(async ({ sourceEntity, id, message }) => {
+    if (id == "krillion:try") {
+        if (sourceEntity?.typeId != "minecraft:player") return;
+        const player = sourceEntity as Player;
+        const result = await tryAnswer(message, "p4", player.getDynamicProperty("autoCorrect") as boolean ?? true)
+        console.warn(JSON.stringify(result));
+    }
 })
 
 world.afterEvents.itemUse.subscribe(({ itemStack, source: player }) => {
