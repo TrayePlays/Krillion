@@ -3,13 +3,13 @@ import { HivemindAPI, ServerStatusResponse } from "api"
 
 import "./ui"
 
-export const api = new HivemindAPI("Krillion", {onConnect: initialConnect, logFailures: false});
-const KRILLION_VERSION = 0.11;
+export const api = new HivemindAPI("Krillion", {onConnect: () => initialConnect(), logFailures: false});
+const KRILLION_VERSION = 0.2;
 const INITIAL_MESSAGE = `§eThanks for installing §6Krillion v${KRILLION_VERSION}\n§pTo get started type §5/function connect\n§7Disable this msg in §d/krillion:settings`;
 
 async function initialConnect() {
-    const noUpdateMessage = world.getDynamicProperty("updateMessage") as boolean ?? false;
-    if (noUpdateMessage == true) return;
+    const updateMessage = world.getDynamicProperty("updateMessage") as boolean ?? true;
+    if (!updateMessage) return;
     const updateReq = await api.sendHttpRequest("https://raw.githubusercontent.com/TrayePlays/Krillion/main/version.json");
 
     if (updateReq.status == ServerStatusResponse.Success) {

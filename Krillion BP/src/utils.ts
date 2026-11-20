@@ -28,15 +28,6 @@ export const formattedTiers = {
     "krillion": "Krillion"
 }
 
-export const scorePictures = {
-    "nocatch": "/textures/ui/realms_red_x.png",
-    "plankton": "/textures/blocks/dirt.png",
-    "schooler": "/textures/blocks/stone.png",
-    "rare": "/textures/items/iron_ingot.png",
-    "deepcut": "/textures/items/gold_ingot.png",
-    "krillion": "/textures/items/krillion.png"
-}
-
 export const scoreColors = {
     "nocatch": "7",
     "plankton": "9",
@@ -58,6 +49,7 @@ interface CorrectAnswer {
     answer: string;
     tier: Tier;
     score: number;
+    receipt: string;
 }
 
 interface IncorrectAnswer {
@@ -66,6 +58,41 @@ interface IncorrectAnswer {
     receipt: string;
 }
 
+interface Results {
+    sample: number; // How much ppl played today
+    betterThan: number; // Percentage of players you did better than
+    dist: number[] //idk what this really means
+}
+
+export function assignPlayerId(player: Player): string {
+    if (player.getDynamicProperty("playerId") == undefined) {
+        const id = generateUUID();
+        player.setDynamicProperty("playerId", id);
+        return id;
+    }
+    return player.getDynamicProperty("playerId") as string;
+}
+
+export async function getResults(date: string, playerId: string, receipts: string[], runId: string, score: number): Promise<Results | undefined> {
+    const resultsReq = await api.sendHttpRequest("https://krillion.io/api/today/complete", {
+        method: "POST",
+        body: JSON.stringify({
+            date,
+            playerId,
+            receipts,
+            runId,
+            score
+        })
+    })
+
+    if (resultsReq.status != ServerStatusResponse.Success) return;
+    console.warn(resultsReq.data);
+    return resultsReq.getData() as Results;
+}
+/**{
+	"date":"2026-11-18","playerId":"7d333c47-396c-4227-9ab5-81d8a40c1ac4","score":410,"runId":"abacd165-6b4b-4fbc-b983-236338a1fe44",
+  "receipts":["eyJ2IjoyLCJzY29wZSI6ImRhaWx5IiwiZ2FtZSI6MTI2LCJ2ZXJzaW9uIjoiMjAyNi0xMS0xOCIsInJvdW5kIjoicjEiLCJwbGF5ZXJJZCI6IjdkMzMzYzQ3LTM5NmMtNDIyNy05YWI1LTgxZDhhNDBjMWFjNCIsInJ1bklkIjoiYWJhY2QxNjUtNmI0Yi00ZmJjLWI5ODMtMjM2MzM4YTFmZTQzIiwic2NvcmUiOjYwLCJpc3N1ZWRBdCI6MTc5NTA0NTY1NzUzOH0.etaoUtTefQ6atK9Md_IfIlCs4MygNbTtR2BEIdZIqEw","eyJ2IjoyLCJzY29wZSI6ImRhaWx5IiwiZ2FtZSI6MTI2LCJ2ZXJzaW9uIjoiMjAyNi0xMS0xOCIsInJvdW5kIjoicjIiLCJwbGF5ZXJJZCI6IjdkMzMzYzQ3LTM5NmMtNDIyNy05YWI1LTgxZDhhNDBjMWFjNCIsInJ1bklkIjoiYWJhY2QxNjUtNmI0Yi00ZmJjLWI5ODMtMjM2MzM4YTFmZTQzIiwic2NvcmUiOjg1LCJpc3N1ZWRBdCI6MTc5NTA0NTY2ODM3NH0.IHmTRH90Djl8XRhhED83KVPs9KJuitHzJJJfhyG2cqM","eyJ2IjoyLCJzY29wZSI6ImRhaWx5IiwiZ2FtZSI6MTI2LCJ2ZXJzaW9uIjoiMjAyNi0xMS0xOCIsInJvdW5kIjoicjMiLCJwbGF5ZXJJZCI6IjdkMzMzYzQ3LTM5NmMtNDIyNy05YWI1LTgxZDhhNDBjMWFjNCIsInJ1bklkIjoiYWJhY2QxNjUtNmI0Yi00ZmJjLWI5ODMtMjM2MzM4YTFmZTQzIiwic2NvcmUiOjYwLCJpc3N1ZWRBdCI6MTc5NTA0NTY3ODU0OX0.EHcCVyi5VhzgZuabpI89rCYIHEra1aaSU-FCDyOqxMU","eyJ2IjoyLCJzY29wZSI6ImRhaWx5IiwiZ2FtZSI6MTI2LCJ2ZXJzaW9uIjoiMjAyNi0xMS0xOCIsInJvdW5kIjoicjQiLCJwbGF5ZXJJZCI6IjdkMzMzYzQ3LTM5NmMtNDIyNy05YWI1LTgxZDhhNDBjMWFjNCIsInJ1bklkIjoiYWJhY2QxNjUtNmI0Yi00ZmJjLWI5ODMtMjM2MzM4YTFmZTQzIiwic2NvcmUiOjg1LCJpc3N1ZWRBdCI6MTc5NTA0NTY4ODYxMX0.LJIyc-CfiqtQwKl6nba1yCee4Y1uDJJiuxLNt_H2i-w","eyJ2IjoyLCJzY29wZSI6ImRhaWx5IiwiZ2FtZSI6MTI2LCJ2ZXJzaW9uIjoiMjAyNi0xMS0xOCIsInJvdW5kIjoicjUiLCJwbGF5ZXJJZCI6IjdkMzMzYzQ3LTM5NmMtNDIyNy05YWI1LTgxZDhhNDBjMWFjNCIsInJ1bklkIjoiYWJhY2QxNjUtNmI0Yi00ZmJjLWI5ODMtMjM2MzM4YTFmZTQzIiwic2NvcmUiOjMwLCJpc3N1ZWRBdCI6MTc5NTA0NTcwMDI0Mn0.sWPox-McRdMUi4wAMLLY-kMbgrIjSRtCgr_akZFKuY4","eyJ2IjoyLCJzY29wZSI6ImRhaWx5IiwiZ2FtZSI6MTI2LCJ2ZXJzaW9uIjoiMjAyNi0xMS0xOCIsInJvdW5kIjoicjYiLCJwbGF5ZXJJZCI6IjdkMzMzYzQ3LTM5NmMtNDIyNy05YWI1LTgxZDhhNDBjMWFjNCIsInJ1bklkIjoiYWJhY2QxNjUtNmI0Yi00ZmJjLWI5ODMtMjM2MzM4YTFmZTQzIiwic2NvcmUiOjYwLCJpc3N1ZWRBdCI6MTc5NTA0NTcxMjU4MX0.yIIKIDizELGp9fClw--13kontybxXagkzF5lOPxy7wc","eyJ2IjoyLCJzY29wZSI6ImRhaWx5IiwiZ2FtZSI6MTI2LCJ2ZXJzaW9uIjoiMjAyNi0xMS0xOCIsInJvdW5kIjoicjciLCJwbGF5ZXJJZCI6IjdkMzMzYzQ3LTM5NmMtNDIyNy05YWI1LTgxZDhhNDBjMWFjNCIsInJ1bklkIjoiYWJhY2QxNjUtNmI0Yi00ZmJjLWI5ODMtMjM2MzM4YTFmZTQzIiwic2NvcmUiOjMwLCJpc3N1ZWRBdCI6MTc5NTA0NTcyMzcyNn0.ix_6RDFuF2L37OBzYPtPPF4hAtwx_1hv7mhPZ0LvwhE"]
+} */
 export async function getTodayPrompts(): Promise<Prompts | undefined> {
     const promptsReq = await api.sendHttpRequest("https://krillion.io/api/today");
 
@@ -74,7 +101,9 @@ export async function getTodayPrompts(): Promise<Prompts | undefined> {
     return promptsReq.getData() as Prompts;
 }
 
-export async function tryAnswer(answer: string, promptId: string, autoCorrect = true): Promise<Answer> {
+export async function tryAnswer(answer: string, promptId: string, player: Player, runId: string): Promise<Answer> {
+    const autoCorrect = player.getDynamicProperty("autoCorrect") as boolean ?? true
+    const playerId = assignPlayerId(player);
     const answerReq = await api.sendHttpRequest("https://krillion.io/api/submit", {
         credentials: "omit",
         headers: {
@@ -96,14 +125,15 @@ export async function tryAnswer(answer: string, promptId: string, autoCorrect = 
         body: JSON.stringify({
             answer,
             date: formatDate(),
-            playerId: generateUUID(),
+            playerId,
             previewCorrection: true,
-            promptId
+            promptId,
+            runId
         })
     })
     if (answerReq.status != ServerStatusResponse.Success) return { accepted: false, receipt: "" }
     const a = answerReq.getData() as Answer;
-    if (a.accepted == false && a.correction != undefined && autoCorrect) return tryAnswer(a.correction, promptId);
+    if (a.accepted == false && a.correction != undefined && autoCorrect) return tryAnswer(a.correction, promptId, player, runId);
     return a;
 
 }
@@ -116,6 +146,11 @@ export interface Stat {
     date: string;
     attempt: number;
     data: { prompts: string[], answers: string[], tiers: Tier[] };
+}
+
+export function getAttemptNumber(player: Player, date: string) {
+    let attempt = 1 + player.getDynamicPropertyIds().filter(dp => dp.startsWith(`stats|${date}`)).length;
+    return attempt;
 }
 
 export function getStats(player: Player) {
@@ -139,7 +174,6 @@ export function getStats(player: Player) {
 }
 
 export function saveStats(player: Player, stat: Stat) {
-    console.warn(`Set stats|${stat.date}|${stat.attempt} to ${JSON.stringify(stat.data)}`);
     player.setDynamicProperty(
         `stats|${stat.date}|${stat.attempt}`,
         JSON.stringify(stat.data)

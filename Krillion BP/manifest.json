@@ -1,7 +1,7 @@
 {
     "format_version": 2,
     "header": {
-        "name": "Krillion BP",
+        "name": "Krillion BP v0.2",
         "description": "-By TrayePlays",
         "min_engine_version": [
             1,
@@ -12,7 +12,7 @@
         "version": [
             1,
             0,
-            0
+            2
         ]
     },
     "modules": [
@@ -45,6 +45,10 @@
         {
             "module_name": "@minecraft/server-ui",
             "version": "2.3.0"
+        },
+        {
+            "uuid": "5012f0bb-3ffc-4f9b-aed2-d7357096cbdb",
+            "version": [1,0,2]
         }
     ]
 }
