@@ -1,7 +1,7 @@
 {
     "format_version": 2,
     "header": {
-        "name": "Krillion RP v0.2",
+        "name": "Krillion RP v0.21",
         "description": "-By TrayePlays",
         "min_engine_version": [
             1,
@@ -12,7 +12,7 @@
         "version": [
             1,
             0,
-            2
+            21
         ]
     },
     "modules": [
@@ -29,7 +29,7 @@
     "dependencies": [
         {
             "uuid": "76bc711b-266d-40a5-8236-09a84b579866",
-            "version": [1,0,2]
+            "version": [1,0,21]
         }
     ]
 }

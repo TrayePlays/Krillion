@@ -1,7 +1,7 @@
 {
     "format_version": 2,
     "header": {
-        "name": "Krillion BP v0.2",
+        "name": "Krillion BP v0.21",
         "description": "-By TrayePlays",
         "min_engine_version": [
             1,
@@ -12,7 +12,7 @@
         "version": [
             1,
             0,
-            2
+            21
         ]
     },
     "modules": [
@@ -48,7 +48,7 @@
         },
         {
             "uuid": "5012f0bb-3ffc-4f9b-aed2-d7357096cbdb",
-            "version": [1,0,2]
+            "version": [1,0,21]
         }
     ]
 }

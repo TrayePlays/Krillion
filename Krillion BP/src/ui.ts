@@ -1,6 +1,6 @@
 import { CommandPermissionLevel, CustomCommandParamType, CustomCommandStatus, Player, system, world } from "@minecraft/server"
 import { ActionFormData, CustomForm, ModalFormData, ObservableBoolean, ObservableNumber, ObservableString } from "@minecraft/server-ui"
-import { assignPlayerId, formatDate, formattedTiers, generateUUID, getAttemptNumber, getQuestion, getResults, getStats, getTodayPrompts, Prompts, saveStats, scoreColors, sleep, Stat, Tier, tryAnswer } from "utils";
+import { assignPlayerId, formatDate, formattedTiers, generateUUID, getAttemptNumber, getQuestion, getResults, getScoreColor, getStats, getStatsPicture, getTodayPrompts, Prompts, saveStats, scoreColors, sleep, Stat, Tier, tierWorth, tryAnswer } from "utils";
 
 export function mainUI(player: Player) {
     const today = formatDate();
@@ -62,6 +62,17 @@ export function mainUI(player: Player) {
         button1.vis.setData(true);
         button1.disabled.setData(false);
         button1.cb = () => gameForm();
+
+        const stats = getStats(player)
+        const button2 = buttonData[1];
+        button2.title.setData("Check Stats");
+        button2.vis.setData(true);
+        button2.disabled.setData(stats.length == 0);
+        button2.cb = async () => {
+            form.close();
+            await sleep(10);
+            statsForm(player, player);
+        };
 
         label1.title.setData(`Krillion the rarer the answers the more you sink!`);
     }
@@ -255,16 +266,24 @@ export function mainUI(player: Player) {
 }
 
 async function statsForm(player: Player, target: Player) {
-    const stats = getStats(target);
+    const stats = getStats(target).sort((a, b) => a.date.localeCompare(b.date));
     const form = new ActionFormData();
     form.title("Stats");
-
+    form.body(`Showing ${target.name}'s stats`);
+    form.divider();
     for (let i = 0; i < stats.length; i++) {
         const stat = stats[i];
-        form.button(`${stat.date}\nAttempt: ${stat.attempt}`);
+        const totalScore = stat.data.tiers.map(t => tierWorth[t]).reduce((previous, curr) => previous + curr);
+        form.button(`${stat.date} (§${getScoreColor(totalScore)}${totalScore}m§r)\nAttempt: ${stat.attempt}`, getStatsPicture(totalScore));
     }
+
+    form.button(`Back to Krillion`);
     const { selection, canceled } = await form.show(player)
     if (canceled || selection == undefined) return;
+    if (selection == stats.length) {
+        mainUI(player);
+        return;
+    }
     const stat = stats[selection]
     statForm(player, target, stat);
 }
@@ -273,14 +292,20 @@ async function statForm(player: Player, target: Player, stat: Stat) {
     const form = new ActionFormData();
     form.title(stat.date);
 
+    form.label(`${target.name}'s Krillion ${stat.date} Attempt: ${stat.attempt}`);
+
+    form.divider();
+
     for (let i = 0; i < stat.data.prompts.length; i++) {
         const answer = stat.data.answers[i];
         const prompt = stat.data.prompts[i];
         const tier = stat.data.tiers[i];
 
         form.label(`${prompt}\n\nYour Answer: §${scoreColors[tier]}${answer.length == 0 ? "No Answer" : answer} (${formattedTiers[tier]})`);
-        if (i != stat.data.prompts.length - 1) form.divider();
+        form.divider();
     }
+    const totalScore = stat.data.tiers.map(t => tierWorth[t]).reduce((previous, curr) => previous + curr);
+    form.header(`Final Score: §${getScoreColor(totalScore)}${totalScore}m`)
 
     form.button("Back");
     const { selection, canceled } = await form.show(player);
@@ -368,7 +393,7 @@ system.afterEvents.scriptEventReceive.subscribe(async ({ sourceEntity, id, messa
     if (id == "krillion:try") {
         if (sourceEntity?.typeId != "minecraft:player") return;
         const player = sourceEntity as Player;
-        const result = await tryAnswer(message, "p7", player, generateUUID());
+        const result = await tryAnswer(message, "p6", player, generateUUID());
         console.warn(JSON.stringify(result));
     }
 })

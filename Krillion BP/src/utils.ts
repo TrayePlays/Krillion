@@ -19,6 +19,24 @@ export interface Prompts {
 
 export type Tier = "nocatch" | "plankton" | "schooler" | "rare" | "deepcut" | "krillion"
 
+export const tierWorth = {
+    "nocatch": 0,
+    "plankton": 10,
+    "schooler": 30,
+    "rare": 60,
+    "deepcut": 85,
+    "krillion": 100
+}
+
+export const scorePictures = {
+    "nocatch": "textures/ui/realms_red_x",
+    "plankton": "textures/items/brick",
+    "schooler": "textures/items/copper_ingot",
+    "rare": "textures/items/iron_ingot",
+    "deepcut": "textures/items/gold_ingot",
+    "krillion": "textures/items/krillion"
+}
+
 export const formattedTiers = {
     "nocatch": "No Catch",
     "plankton": "Plankton",
@@ -86,9 +104,29 @@ export async function getResults(date: string, playerId: string, receipts: strin
     })
 
     if (resultsReq.status != ServerStatusResponse.Success) return;
-    console.warn(resultsReq.data);
     return resultsReq.getData() as Results;
 }
+
+export function getStatsPicture(score: number) {
+    let tier: Tier = "nocatch";
+    if (score < 150) tier = "plankton";
+    else if (score < 250) tier = "schooler";
+    else if (score < 350) tier = "rare";
+    else if (score < 449) tier = "deepcut";
+    else tier = "krillion";
+    return scorePictures[tier];
+}
+
+export function getScoreColor(score: number) {
+    let tier: Tier = "nocatch";
+    if (score < 150) tier = "plankton";
+    else if (score < 250) tier = "schooler";
+    else if (score < 350) tier = "rare";
+    else if (score < 449) tier = "deepcut";
+    else tier = "krillion";
+    return scoreColors[tier];
+}
+
 /**{
 	"date":"2026-11-18","playerId":"7d333c47-396c-4227-9ab5-81d8a40c1ac4","score":410,"runId":"abacd165-6b4b-4fbc-b983-236338a1fe44",
   "receipts":["eyJ2IjoyLCJzY29wZSI6ImRhaWx5IiwiZ2FtZSI6MTI2LCJ2ZXJzaW9uIjoiMjAyNi0xMS0xOCIsInJvdW5kIjoicjEiLCJwbGF5ZXJJZCI6IjdkMzMzYzQ3LTM5NmMtNDIyNy05YWI1LTgxZDhhNDBjMWFjNCIsInJ1bklkIjoiYWJhY2QxNjUtNmI0Yi00ZmJjLWI5ODMtMjM2MzM4YTFmZTQzIiwic2NvcmUiOjYwLCJpc3N1ZWRBdCI6MTc5NTA0NTY1NzUzOH0.etaoUtTefQ6atK9Md_IfIlCs4MygNbTtR2BEIdZIqEw","eyJ2IjoyLCJzY29wZSI6ImRhaWx5IiwiZ2FtZSI6MTI2LCJ2ZXJzaW9uIjoiMjAyNi0xMS0xOCIsInJvdW5kIjoicjIiLCJwbGF5ZXJJZCI6IjdkMzMzYzQ3LTM5NmMtNDIyNy05YWI1LTgxZDhhNDBjMWFjNCIsInJ1bklkIjoiYWJhY2QxNjUtNmI0Yi00ZmJjLWI5ODMtMjM2MzM4YTFmZTQzIiwic2NvcmUiOjg1LCJpc3N1ZWRBdCI6MTc5NTA0NTY2ODM3NH0.IHmTRH90Djl8XRhhED83KVPs9KJuitHzJJJfhyG2cqM","eyJ2IjoyLCJzY29wZSI6ImRhaWx5IiwiZ2FtZSI6MTI2LCJ2ZXJzaW9uIjoiMjAyNi0xMS0xOCIsInJvdW5kIjoicjMiLCJwbGF5ZXJJZCI6IjdkMzMzYzQ3LTM5NmMtNDIyNy05YWI1LTgxZDhhNDBjMWFjNCIsInJ1bklkIjoiYWJhY2QxNjUtNmI0Yi00ZmJjLWI5ODMtMjM2MzM4YTFmZTQzIiwic2NvcmUiOjYwLCJpc3N1ZWRBdCI6MTc5NTA0NTY3ODU0OX0.EHcCVyi5VhzgZuabpI89rCYIHEra1aaSU-FCDyOqxMU","eyJ2IjoyLCJzY29wZSI6ImRhaWx5IiwiZ2FtZSI6MTI2LCJ2ZXJzaW9uIjoiMjAyNi0xMS0xOCIsInJvdW5kIjoicjQiLCJwbGF5ZXJJZCI6IjdkMzMzYzQ3LTM5NmMtNDIyNy05YWI1LTgxZDhhNDBjMWFjNCIsInJ1bklkIjoiYWJhY2QxNjUtNmI0Yi00ZmJjLWI5ODMtMjM2MzM4YTFmZTQzIiwic2NvcmUiOjg1LCJpc3N1ZWRBdCI6MTc5NTA0NTY4ODYxMX0.LJIyc-CfiqtQwKl6nba1yCee4Y1uDJJiuxLNt_H2i-w","eyJ2IjoyLCJzY29wZSI6ImRhaWx5IiwiZ2FtZSI6MTI2LCJ2ZXJzaW9uIjoiMjAyNi0xMS0xOCIsInJvdW5kIjoicjUiLCJwbGF5ZXJJZCI6IjdkMzMzYzQ3LTM5NmMtNDIyNy05YWI1LTgxZDhhNDBjMWFjNCIsInJ1bklkIjoiYWJhY2QxNjUtNmI0Yi00ZmJjLWI5ODMtMjM2MzM4YTFmZTQzIiwic2NvcmUiOjMwLCJpc3N1ZWRBdCI6MTc5NTA0NTcwMDI0Mn0.sWPox-McRdMUi4wAMLLY-kMbgrIjSRtCgr_akZFKuY4","eyJ2IjoyLCJzY29wZSI6ImRhaWx5IiwiZ2FtZSI6MTI2LCJ2ZXJzaW9uIjoiMjAyNi0xMS0xOCIsInJvdW5kIjoicjYiLCJwbGF5ZXJJZCI6IjdkMzMzYzQ3LTM5NmMtNDIyNy05YWI1LTgxZDhhNDBjMWFjNCIsInJ1bklkIjoiYWJhY2QxNjUtNmI0Yi00ZmJjLWI5ODMtMjM2MzM4YTFmZTQzIiwic2NvcmUiOjYwLCJpc3N1ZWRBdCI6MTc5NTA0NTcxMjU4MX0.yIIKIDizELGp9fClw--13kontybxXagkzF5lOPxy7wc","eyJ2IjoyLCJzY29wZSI6ImRhaWx5IiwiZ2FtZSI6MTI2LCJ2ZXJzaW9uIjoiMjAyNi0xMS0xOCIsInJvdW5kIjoicjciLCJwbGF5ZXJJZCI6IjdkMzMzYzQ3LTM5NmMtNDIyNy05YWI1LTgxZDhhNDBjMWFjNCIsInJ1bklkIjoiYWJhY2QxNjUtNmI0Yi00ZmJjLWI5ODMtMjM2MzM4YTFmZTQzIiwic2NvcmUiOjMwLCJpc3N1ZWRBdCI6MTc5NTA0NTcyMzcyNn0.ix_6RDFuF2L37OBzYPtPPF4hAtwx_1hv7mhPZ0LvwhE"]
@@ -167,8 +205,6 @@ export function getStats(player: Player) {
             data: stat
         });
     }
-
-    console.warn(`Got stats: ${JSON.stringify(stats)}`);
 
     return stats;
 }
